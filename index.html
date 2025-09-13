@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Simple Blog</title>
+    <style>
+        /* Blue and White Design with Animations */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            scroll-behavior: smooth;
+        }
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+        .container {
+            max-width: 800px;
+            margin: 80px auto 20px;
+            padding: 20px;
+        }
+        .post {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transform: translateY(50px);
+            animation: slideIn 0.5s ease forwards;
+        }
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .comment-box {
+            margin-top: 10px;
+        }
+        .comment-box textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #007bff;
+            border-radius: 4px;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+        .add-post-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            background-color: #28a745;
+        }
+        #post-form {
+            display: none;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        #post-form input, #post-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #007bff;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>My Simple Blog</h1>
+    </header>
+    <div class="container">
+        <button class="btn add-post-btn" onclick="showPostForm()">+</button>
+        <div id="post-form">
+            <input type="password" id="admin-password" placeholder="Admin Password">
+            <textarea id="post-content" placeholder="Write your post..."></textarea>
+            <button class="btn" onclick="submitPost()">Submit Post</button>
+        </div>
+        <div id="posts"></div>
+    </div>
+
+    <script>
+        // Load posts and comments from localStorage
+        let posts = JSON.parse(localStorage.getItem('posts')) || [];
+
+        // Render posts and comments
+        function renderPosts() {
+            const postsDiv = document.getElementById('posts');
+            postsDiv.innerHTML = '';
+            posts.forEach((post, index) => {
+                const postDiv = document.createElement('div');
+                postDiv.className = 'post';
+                postDiv.innerHTML = `
+                    <p>${post.content}</p>
+                    <div class="comment-box">
+                        <textarea placeholder="Add a comment..."></textarea>
+                        <button class="btn" onclick="addComment(${index})">Comment</button>
+                    </div>
+                    <div class="comments">
+                        ${post.comments.map(comment => `<p>${comment}</p>`).join('')}
+                    </div>
+                `;
+                postsDiv.appendChild(postDiv);
+            });
+        }
+
+        // Show post form
+        function showPostForm() {
+            document.getElementById('post-form').style.display = 'block';
+        }
+
+        // Submit a new post
+        function submitPost() {
+            const password = document.getElementById('admin-password').value;
+            const content = document.getElementById('post-content').value;
+            if (password !== 'admin123') { // Simple hardcoded password
+                alert('Incorrect password!');
+                return;
+            }
+            if (content.trim()) {
+                posts.push({ content, comments: [] });
+                localStorage.setItem('posts', JSON.stringify(posts));
+                document.getElementById('post-form').style.display = 'none';
+                document.getElementById('post-content').value = '';
+                document.getElementById('admin-password').value = '';
+                renderPosts();
+            }
+        }
+
+        // Add a comment to a post
+        function addComment(postIndex) {
+            const postDiv = document.getElementsByClassName('post')[postIndex];
+            const textarea = postDiv.querySelector('textarea');
+            const comment = textarea.value.trim();
+            if (comment) {
+                posts[postIndex].comments.push(comment);
+                localStorage.setItem('posts', JSON.stringify(posts));
+                textarea.value = '';
+                renderPosts();
+            }
+        }
+
+        // Initial render
+        renderPosts();
+    </script>
+</body>
+  </html>
